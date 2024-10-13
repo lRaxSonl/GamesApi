@@ -1,10 +1,10 @@
 const { Game, Genre, Developer, Review } = require('../config/createdb');
 const { Sequelize } = require('sequelize');
 const { Op } = require('sequelize');
+const { authenticateToken, isAdmin } = require('../middlewares/middleware');
 
 
 module.exports = function(app) {
-
 
     //Получение списка всех видеоигр.
     app.get('/api/games', async (req, res) => {
@@ -15,7 +15,6 @@ module.exports = function(app) {
             res.status(500).json({ error: 'Ошибка при получении игр' });
         }
     });
-
 
 
     //Поиск игр по названию.
@@ -65,7 +64,6 @@ module.exports = function(app) {
     });
 
 
-
     //Фильтрация игр по году выпуска.
     app.get('/api/games/filter', async (req, res) => {
         const { releaseYear } = req.query;
@@ -78,7 +76,6 @@ module.exports = function(app) {
             res.status(500).json({ error: 'Ошибка при фильтрации игр по году выпуска' });
         }
     });
-
 
 
     //Сортировка игр по любому полю.
@@ -95,7 +92,6 @@ module.exports = function(app) {
     });
 
 
-
     //Получение списка самых популярных игр.
     app.get('/api/games/statistics/popular', async (req, res) => {
         try {
@@ -107,7 +103,6 @@ module.exports = function(app) {
             res.status(500).json({ error: 'Ошибка при получении популярных игр' });
         }
     });
-
 
 
     //Получение игр с наибольшим количеством обзоров.
@@ -123,25 +118,32 @@ module.exports = function(app) {
     });
 
 
-
     //Получение информации об игре по её ID.
     app.get('/api/games/:id', async (req, res) => {
         try {
-            const game = await Game.findByPk(req.params.id);
+            const game = await Game.findByPk(req.params.id, { include: [
+                {
+                    model: Review,
+                    as: 'Reviews',
+                    attributes: ['id', 'userId', 'text']
+                },
+            ]
+        });
+            
             if (game) {
                 res.json(game);
             } else {
                 res.status(404).json({ error: 'Игра не найдена' });
             }
         } catch (error) {
-            res.status(500).json({ error: 'Ошибка при получении информации об игре' });
+            res.status(500).json({ error: 'Ошибка при получении информации об игре', details: error.message });
+            console.log(error)
         }
     });
 
 
-
     //Добавление новой игры.
-    app.post('/api/add/games', async (req, res) => {
+    app.post('/api/add/games', authenticateToken, isAdmin, async (req, res) => {
         try {
             const { title, releaseDate, team, rating, genres, summary } = req.body;
             
@@ -174,9 +176,8 @@ module.exports = function(app) {
     });
 
 
-
     //Обновление информации об игре по её ID.
-    app.put('/api/upd/games/:id', async (req, res) => {
+    app.put('/api/upd/games/:id', authenticateToken, isAdmin, async (req, res) => {
         try {
             const game = await Game.findByPk(req.params.id);
             if (!game) {
@@ -208,7 +209,7 @@ module.exports = function(app) {
 
 
     //Удаление игры по её ID.
-    app.delete('/api/del/games/:id', async (req, res) => {
+    app.delete('/api/del/games/:id', authenticateToken, isAdmin, async (req, res) => {
         try {
             const game = await Game.findByPk(req.params.id);
             if (!game) {
@@ -218,6 +219,28 @@ module.exports = function(app) {
             res.json({ message: 'Игра успешно удалена' });
         } catch (error) {
             res.status(500).json({ error: 'Ошибка при удалении игры' });
+        }
+    });
+
+    app.post('/api/games/:gameId/comments', authenticateToken, async (req, res) => {
+        try {
+            const { text } = req.body;
+            const gameId = req.params.gameId;
+    
+            const game = await Game.findByPk(gameId);
+            if (!game) {
+                return res.status(404).json({ message: 'Игра не найдена' });
+            }
+    
+            const review = await Review.create({
+                text,
+                gameId,
+                userId: req.user.id
+            });
+    
+            res.status(201).json(review);
+        } catch (error) {
+            res.status(500).json({ error: 'Ошибка при добавлении комментария' });
         }
     });
 }

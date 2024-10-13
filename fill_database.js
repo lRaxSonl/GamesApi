@@ -49,7 +49,7 @@ async function saveGameToDatabase(gameData) {
         if (reviews) {
             const reviewTexts = reviews.split(',').map(review => review.trim());
             for (const reviewText of reviewTexts) {
-                if (reviewText) {
+                if (reviewText) { // Проверка, чтобы избежать создания пустых отзывов
                     await Review.create({ text: reviewText, gameId: game.id });
                 }
             }

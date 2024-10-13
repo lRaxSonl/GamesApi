@@ -10,11 +10,14 @@
   "description": "",
   "dependencies": {
     "3": "file:",
+    "bcryptjs": "^2.4.3",
     "csv-parse": "^5.5.6",
     "csv-parser": "^3.0.0",
-    "express": "^4.21.0",
-    "express-handlebars": "^8.0.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
+    "mariadb": "^3.3.2",
     "mysql2": "^3.11.3",
     "sequelize": "^6.37.4"
   }

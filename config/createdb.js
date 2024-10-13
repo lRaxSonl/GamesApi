@@ -2,7 +2,7 @@ const Game = require("../models/game");
 const Genre = require('../models/genre');
 const Developer = require('../models/developer');
 const Review = require('../models/review');
-const User = require('../models/user');
+const User = require('../models/user')
 const database = require('./database');
 
 Game.belongsToMany(Genre, { through: 'GameGenres' });
