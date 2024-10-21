@@ -8,14 +8,14 @@ const path = require('path');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//Подключение контроллеров
-require('./controllers/gameControllers')(app);
-require('./controllers/authControllers')(app);
-require('./controllers/userConttoller')(app)
-
 
 //Подключение маршрутов
-require('./routes/routes')(app);
+require('./routes/templateRoutes')(app);
+require('./routes/authRoutes')(app);
+require('./routes/userRoutes')(app);
+require('./routes/gameRoutes')(app);
+
+
 
 app.set('view engine', 'ejs'); //Устанавливаем EJS как шаблонизатор
 app.set('views', path.join(__dirname, 'templates'));
