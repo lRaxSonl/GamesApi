@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../config/createdb');
 const JWT_SECRET = require('../config/config');
 
-// егистрация пользователя
+//Регистрация пользователя
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -28,7 +28,7 @@ const registerUser = async (req, res) => {
             password: hashedPassword
         });
 
-        // Генерация JWT токена
+        //Генерация JWT токена
         const token = jwt.sign({ id: newUser.id, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
 
         res.status(201).json({ token });
@@ -43,7 +43,7 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Проверка пользователя в базе данных
+        //Проверка пользователя в базе данных
         const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({ message: 'Неверный email или пароль' });
